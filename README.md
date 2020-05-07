@@ -7,29 +7,29 @@ An E-Commerce CMS Written Entirely In C++ As A University Project/Assignment
 
 ➋ FOR CUSTOMERS
 
-	• Buy Menu
-    ◆ Show which items are in cart
-    ◆ Option to edit item quantity that you already have in the cart
-	• Search Menu
-		◆ Search By Name
-		◆ Search By ID
-		◆ Search By Product Quantity In Cart
-		◆ Search By Price
-	• Check Cart Items
-	• Buy & Checkout
-		◆ Confirm Buy
-		◆ Discard Items & Checkout
-	• Pretty Colors
+	◆ Buy Menu
+		• Show which items are in cart
+		• Option to edit item quantity that you already have in the cart
+	◆ Search Menu
+		• Search By Name
+		• Search By ID
+		• Search By Product Quantity In Cart
+		• Search By Price
+	◆ Check Cart Items
+	◆ Buy & Checkout
+		• Confirm Buy
+		• Discard Items & Checkout
+	◆ Pretty Colors
  
 ➌ FOR EMPLOYEES
-	• Separate (working) Login & Sign Up page for employees
-	• Sign up page requires Master password (Hard coded into the code: 8531F1C0 ) to sign up so that anyone who doesn't have the source code can't sign up
-	• Advanced Analytics menu which shows extra data about how products are performing, such as:
-	  ◆ List of most profitable items
-	  ◆ List of items low on stock
-	  ◆ Average Sale Amount of a specific product, i.e, average buy rate by the customers 
-	  ◆ Know how long your stock will last in the Advanced Analytics menu -> Average Sale Amount
-	• Pretty Colors
+	◆ Separate (working) Login & Sign Up page for employees
+	◆ Sign up page requires Master password (Hard coded into the code: 8531F1C0 ) to sign up so that anyone who doesn't have the source code can't sign up
+	◆ Advanced Analytics menu which shows extra data about how products are performing, such as:
+	  • List of most profitable items
+	  • List of items low on stock
+	  • Average Sale Amount of a specific product, i.e, average buy rate by the customers 
+	  • Know how long your stock will last in the Advanced Analytics menu -> Average Sale Amount
+	◆ Pretty Colors
 
 ➍ Extensive Error Handling to ensure user does not encounter any bugs
 ```
