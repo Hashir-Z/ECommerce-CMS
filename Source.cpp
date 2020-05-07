@@ -166,7 +166,7 @@ void WelcomeScreen()
 		}
 		default:
 		{
-			cout << "Please Enter Valid Choice!";
+			cout << "Please Enter Valid Choice!" << endl << endl;
 			run = 1;
 			system("pause");
 			system("CLS");
@@ -1538,6 +1538,8 @@ Extra Functionality:
 			=> Know how long your stock will last in the Advanced Analytics menu -> Average Sale Amount
 	4) Pretty Colors
 
+4) Extensive Error Handling to ensure user does not encounter any bugs
+
 Challenges I Made For Myself
 	1) Main() should only call only ONE function, and do nothing else
 	2) Remove all unnecessary code 
@@ -1573,4 +1575,6 @@ Questions At The End Of The Project:
 		I assume it has something to do with the program not being able to tell where the array ends, but if that is the case, then how do dynamic arrays work? 
 		I mean I understand that they are created and allotted memory dynamically at run time, but what if that array uses all the continous memory locations 
 		available, will the array get copied to a new address with more space available? How will the programmer access the new elements of it then?
+
+I HAVE ALSO UPLOADED THE PROJECT TO GITHUB, CHECK IT OUT HERE: https://github.com/Icedwhisper/ECommerce-CMS
 */
