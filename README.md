@@ -33,7 +33,7 @@ An E-Commerce CMS Written Entirely In C++ As A University Project/Assignment
 4) Extensive Error Handling to ensure user does not encounter any bugs
 
 ### Challenges I Made For Myself ###
-	1) Main() should only call only ONE function, and do nothing else
+	1) Main should only call only ONE function, and do nothing else
 	2) Remove all unnecessary code 
 	3) Play with addresses as much as possible
 	4) Reuse functions by repurposing them in a manner that allows the same task with slight modifications to be done using them
