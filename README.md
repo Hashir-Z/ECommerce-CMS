@@ -5,6 +5,7 @@ An E-Commerce CMS Written Entirely In C++ As A University Project/Assignment
 1) Separate Portal for Employees and Customers
 
 2) FOR CUSTOMERS
+
 		* Buy Menu
     	* Show which items are in cart (In the buy menu)
     	* Option to edit item quantity that you already have in the cart (From the buy menu screen)
