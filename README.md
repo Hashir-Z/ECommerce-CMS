@@ -9,14 +9,14 @@ An E-Commerce CMS Written Entirely In C++ As A University Project/Assignment
 	* Buy Menu
     	* Show which items are in cart
     	* Option to edit item quantity that you already have in the cart
-		* Search Menu
-			* Search By Name
-			* Search By ID
-			* Search By Product Quantity In Cart
-			* Search By Price
+	* Search Menu
+		* Search By Name
+		* Search By ID
+		* Search By Product Quantity In Cart
+		* Search By Price
 		* Check Cart Items
-  	* Buy & Checkout
-    	* Confirm Buy
+	* Buy & Checkout
+		* Confirm Buy
 		* Discard Items & Checkout
 		* Pretty Colors
  
