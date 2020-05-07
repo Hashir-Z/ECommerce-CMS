@@ -2,6 +2,7 @@
 An E-Commerce CMS Written Entirely In C++ As A University Project/Assignment
 
 ### Functionality ### 
+code()
 1) Separate Portal for Employees and Customers
 
 2) FOR CUSTOMERS
