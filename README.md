@@ -1,23 +1,23 @@
-# # ECommerce-CMS #
+# ECommerce-CMS #
 An E-Commerce CMS Written Entirely In C++ As A University Project/Assignment
 
-# ### Functionality ### 
+### Functionality ### 
 1) Separate Portal for Employees and Customers
 
 2) FOR CUSTOMERS
-  * Buy Menu
-    * Show which items are in cart (In the buy menu)
-	  * Option to edit item quantity that you already have in the cart (From the buy menu screen)
-  * Search Menu
-    * Search By Name
-    * Search By ID
-    * Search By Product Quantity In Cart
-    * Search By Price
-  * Check Cart Items
-  * Buy & Checkout
-    * Confirm Buy
-  * Discard Items & Checkout
-  * Pretty Colors
+		* Buy Menu
+    		* Show which items are in cart (In the buy menu)
+    		* Option to edit item quantity that you already have in the cart (From the buy menu screen)
+		* Search Menu
+			* Search By Name
+			* Search By ID
+			* Search By Product Quantity In Cart
+			* Search By Price
+		* Check Cart Items
+  	* Buy & Checkout
+    	* Confirm Buy
+		* Discard Items & Checkout
+		* Pretty Colors
  
 3) FOR EMPLOYEES
 	* Separate (working) Login & Sign Up page for employees
@@ -31,14 +31,14 @@ An E-Commerce CMS Written Entirely In C++ As A University Project/Assignment
 
 4) Extensive Error Handling to ensure user does not encounter any bugs
 
-# ### Challenges I Made For Myself ###
+### Challenges I Made For Myself ###
 	1) Main() should only call only ONE function, and do nothing else
 	2) Remove all unnecessary code 
 	3) Play with addresses as much as possible
 	4) Reuse functions by repurposing them in a manner that allows the same task with slight modifications to be done using them
 	5) Try to use Function Overloading for atleast one thing. Verdict: It is only useful in bigger programs when you run out of names, and confusing 
 
-# ### What I've Learnt Through This Project: ###
+### What I've Learnt Through This Project: ###
 	1) Importance of documentation
 	2) How Recursions work and what happens when you call a function within a function, and how to properly terminate recursion in a manner that doesn't break the program/cause unwanted code execution
 	3) How to reduce code by modifying existing functions
@@ -47,7 +47,7 @@ An E-Commerce CMS Written Entirely In C++ As A University Project/Assignment
 	6) How passing by reference reduces code and decreases complexity of code
 	7) How to make sort function work with most input types
 
-# ### Questions At The End Of The Project: ###
+### Questions At The End Of The Project: ###
 	 1) How to do file-handling to save variables for later use (TAUGHT IN LATEST LAB)
 	 2) How safe global variables are and is it better to use them or should I create local variables and pass a reference to them?
 	 3) Why does cin sometimes not work? This is expecially true when trying to take in input with space. I have to use fflush() and cin.ignore(), 
@@ -66,5 +66,3 @@ An E-Commerce CMS Written Entirely In C++ As A University Project/Assignment
 		I assume it has something to do with the program not being able to tell where the array ends, but if that is the case, then how do dynamic arrays work? 
 		I mean I understand that they are created and allotted memory dynamically at run time, but what if that array uses all the continous memory locations 
 		available, will the array get copied to a new address with more space available? How will the programmer access the new elements of it then?
-    
-    
