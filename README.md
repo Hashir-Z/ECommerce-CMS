@@ -14,11 +14,11 @@ An E-Commerce CMS Written Entirely In C++ As A University Project/Assignment
 		* Search By ID
 		* Search By Product Quantity In Cart
 		* Search By Price
-		* Check Cart Items
+	* Check Cart Items
 	* Buy & Checkout
 		* Confirm Buy
 		* Discard Items & Checkout
-		* Pretty Colors
+	* Pretty Colors
  
 3) FOR EMPLOYEES
 	* Separate (working) Login & Sign Up page for employees
