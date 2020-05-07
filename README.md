@@ -59,13 +59,11 @@ An E-Commerce CMS Written Entirely In C++ As A University Project/Assignment
 		 unless you terminate the program.
 	 ➍ When I point a pointer to an address stored in another pointer which stores the address of an array (i.e, another pointer), it 
 	 only shows the first value stored in the array, but not the rest of it. e.g:
-	 		
-			int arr[10] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
-			int * ptr = arr;
-			int * ptr2 = ptr;
-			
-		If I try to access ptr2, it will only show the first value stored in arr in the debugger (auto watch variable), i.e, arr[0] = 0,
-		whereas the array arr in the debugger shows all of its indexes. I assume it has something to do with the program not being able to
-		tell where the array ends, but if that is the case, then how do dynamic arrays work? I mean I understand that they are created and
-		allotted memory dynamically at run time, but what if that array uses all the continous memory locations available, will the array
-		get copied to a new address with more space available? How will the programmer access the new elements of it then?
+	 int arr[10] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
+	 int * ptr = arr;
+	 int * ptr2 = ptr;
+	 If I try to access ptr2, it will only show the first value stored in arr in the debugger (auto watch variable), i.e, arr[0] = 0,
+	 whereas the array arr in the debugger shows all of its indexes. I assume it has something to do with the program not being able to
+	 tell where the array ends, but if that is the case, then how do dynamic arrays work? I mean I understand that they are created and
+	 allotted memory dynamically at run time, but what if that array uses all the continous memory locations available, will the array
+	 get copied to a new address with more space available? How will the programmer access the new elements of it then?
