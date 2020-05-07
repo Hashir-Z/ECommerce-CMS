@@ -2,7 +2,7 @@
 An E-Commerce CMS Written Entirely In C++ As A University Project/Assignment
 
 ### Functionality ### 
-code()
+'
 1) Separate Portal for Employees and Customers
 
 2) FOR CUSTOMERS
@@ -68,3 +68,4 @@ code()
 		I assume it has something to do with the program not being able to tell where the array ends, but if that is the case, then how do dynamic arrays work? 
 		I mean I understand that they are created and allotted memory dynamically at run time, but what if that array uses all the continous memory locations 
 		available, will the array get copied to a new address with more space available? How will the programmer access the new elements of it then?
+'
