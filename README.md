@@ -64,8 +64,8 @@ An E-Commerce CMS Written Entirely In C++ As A University Project/Assignment
 			int * ptr = arr;
 			int * ptr2 = ptr;
 			
-	If I try to access ptr2, it will only show the first value stored in arr in the debugger (auto watch variable), i.e, arr[0] = 0,
-	whereas the array arr	in the debugger shows all of its indexes.	I assume it has something to do with the program not being able to
-	tell where the array ends, but if that is the case, then how do dynamic arrays work? I mean I understand that they are created and
-	allotted memory dynamically at run time, but what if that array uses all the continous memory locations available, will the array
-	get copied to a new address with more space available? How will the programmer access the new elements of it then?
+		If I try to access ptr2, it will only show the first value stored in arr in the debugger (auto watch variable), i.e, arr[0] = 0,
+		whereas the array arr in the debugger shows all of its indexes. I assume it has something to do with the program not being able to
+		tell where the array ends, but if that is the case, then how do dynamic arrays work? I mean I understand that they are created and
+		allotted memory dynamically at run time, but what if that array uses all the continous memory locations available, will the array
+		get copied to a new address with more space available? How will the programmer access the new elements of it then?
