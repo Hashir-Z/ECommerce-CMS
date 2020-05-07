@@ -2,7 +2,7 @@
 An E-Commerce CMS Written Entirely In C++ As A University Project/Assignment
 
 ### Functionality ### 
-'
+```
 1) Separate Portal for Employees and Customers
 
 2) FOR CUSTOMERS
@@ -32,7 +32,7 @@ An E-Commerce CMS Written Entirely In C++ As A University Project/Assignment
 	* Pretty Colors
 
 4) Extensive Error Handling to ensure user does not encounter any bugs
-
+```
 ### Challenges I Made For Myself ###
 	1) Main should only call only ONE function, and do nothing else
 	2) Remove all unnecessary code 
@@ -68,4 +68,3 @@ An E-Commerce CMS Written Entirely In C++ As A University Project/Assignment
 		I assume it has something to do with the program not being able to tell where the array ends, but if that is the case, then how do dynamic arrays work? 
 		I mean I understand that they are created and allotted memory dynamically at run time, but what if that array uses all the continous memory locations 
 		available, will the array get copied to a new address with more space available? How will the programmer access the new elements of it then?
-'
