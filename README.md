@@ -29,9 +29,13 @@ An E-Commerce CMS Written Entirely In C++ As A University Project/Assignment
 	  • List of items low on stock
 	  • Average Sale Amount of a specific product, i.e, average buy rate by the customers 
 	  • Know how long your stock will last in the Advanced Analytics menu -> Average Sale Amount
+	◆ Generation of sale reports for specific day, month, or year
+	◆ Edit Item Details.
 	◆ Pretty Colors
 
 ➍ Extensive Error Handling to ensure user does not encounter any bugs
+➎ File handling that stores all data for report generation
+
 ```
 ### Challenges I Made For Myself ###
 	➊ Main should only call only ONE function, and do nothing else
