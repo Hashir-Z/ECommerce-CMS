@@ -11,6 +11,8 @@ Fa-2019/BSCS/005
 #include <iostream>		// Used For I/O
 #include <Windows.h>	// Used For Sleep()
 #include <iomanip>		// Used For Setw()
+#include <fstream>		// Used For File Handling
+
 using namespace std;
 
 // -------------------
@@ -32,75 +34,90 @@ void Employee_L_S();
 void Login();
 void SignUp();
 void EmployeeMainMenu();
-void GroceryDetail(bool isEmployee);
+void GroceryDetail();
 void DisplayDataCompany(int index, bool run);
 void SearchMenu(bool isEmployee);
 void AdvancedAnalytics();
-void ProfitableItems(bool Reverse, bool isAvg);
+void ProfitableItems(bool isStockList, bool isAvg);
+void EditItemDetails();
+void RevenueReport();
 
 // -------------------
 // Find Data
 // -------------------
 
-void Find(int input, int *data, bool isEmployee);
+int Find(int input, int *data, bool isEmployee, bool Run, int shown, int Runs);
 void Find(char *name, bool isEmployee);
-int sort(int *arr);
+int sort(int *arr, int size);
+
+// -------------------
+// File Handling Functions
+// -------------------
+
+void SaveCompanyData();
+void LoadCompanyData();
+void SaveBill();
+void ShowBill();
+void SaveEmployeeData();
+void LoadEmployeeData();
 
 // -------------------
 // FUNCTION DECLARATION END
 // -------------------
 
-// INT Variable
-int TotUsers = 0;
-int done[10] = { -1 };
-int counter = 0;
-int ProdID[10] = { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
-int ProdQty[10] = { 9, 8, 6, 7, 4, 100, 25, 4, 7, 2 };
-int OriginalProdQty[10] = { 0 };
-int TotPurchased[10] = { 0 };
-int TmpTotPurchased[10] = { 0 };
-int UserTotPurchased[10] = { 0 };
-int ProdPrice[10] = { 549, 1599, 799, 549, 1269, 2799, 249, 99, 159, 729 };
-int ProdBuyPrice[10] = { 100, 500, 320, 178, 751, 1278, 67, 15, 65, 150 };
+// -------------------
+// STRUCTS
+// -------------------
 
-// CHAR Variable
-char Username[100][100] = { '\0' };
-char Password[100][100] = { '\0' };
+struct Product
+{
+	int ProdID;
+	int ProdQty; 
+	int ProdPrice;
+	char ProdName[30];
+	char ProdDescription[120];
+}Prod[10];
+
+struct Customer
+{
+	int ItemsQtyInCart[10];
+}CustDetail[100];
+
+struct CompanyData
+{
+	int OriginalProdQty;
+	int ProdBuyPrice;
+	int TotSold;
+}CompData[10];
+
+struct EmployeeLogin
+{
+	char Username[100];
+	char Password[100];
+}EmpLog[100];
+
+// Struct Pointers
+
+int *PtrProd[10];
+int *PtrCompData[10];
+
+// INT Variable: DIDN'T USE IN STRUCTS BECAUSE THEY DON'T NEED TO BE DIFFERENT FOR EVERY USER!
+
+int TotUsers = 0;					// Used For Keeping Count Of Total Users In One Run
+int done[10] = { -1 };				// Used For Sorting
+int counter = 0;					// Used For Getting Total Number Of Employees
+int TmpTotPurchased[10] = { 0 };	// Temporarily Stores Customer Order Details
 
 // ======================================
 // ---- USE THIS KEY FOR SIGNING UP! ----
 // ======================================
 
-char MasterKey[100] = { "8531F1C0" };
+char MasterKey[100] = { "12345" };
 
 // =====================================
 // ---------------- END ----------------
 // =====================================
 
-char ProdName[10][30] = {
-	{"Half-Life"},
-	{"Half-Life 2"},
-	{"Half-Life 2: Episode 1"},
-	{"Half-Life 2: Episode 2"},
-	{"Half-Life 2: Lost Coast"},
-	{"Half-Life: Alyx"},
-	{"Half-Life: Opposing Force"},
-	{"Half-Life: Blue Shift"},
-	{"Half-Life 2: Deathmatch"},
-	{"Black Mesa"}
-};		// Name Of My Favorite Games Series: Half Life
-char ProdDescription[10][120] = {
-	{"Half-Life is a first-person shooter game developed by Valve. It was Valve's first game."},
-	{"Half-Life 2 is a first-person shooter and it combines shooting, puzzles, and storytelling."},
-	{"Gordon Freeman alongside his companion Alyx Vance, must escape City 17 before it explodes."},
-	{"Following Episode 1, it was the second in a planned trilogy that continue the story of Half-Life"},
-	{"The player is tasked to travel up a coastal cliff to destroy a Combine headcrab artillery."},
-	{"Taking place between events of HL1 and HL2, Alyx is on a mission to seize a Combine superweapon."},
-	{"Adrian is sent to neutralize the Black Mesa scientists when a scientific mishap happens."},
-	{"After a mishap causes Black Mesa to be invaded by aliens, Calhoun must fight his way to safety."},
-	{"Half-Life 2: Deathmatch is a multiplayer first-person shooter video game developed by Valve."},
-	{"Black Mesa is a fan remake of the original Half-Life with graphics that match todays standards."}
-};
 
 // -------------------
 // PROGRAMS START HERE
@@ -108,17 +125,21 @@ char ProdDescription[10][120] = {
 
 int main()
 {
-	// Initialize Arrays
+	
+	//Initialize Pointers To Point At Address of 1st Variable of Struct Objects
 	for (int i = 0; i < 10; i++)
 	{
-		done[i] = -1;
-		OriginalProdQty[i] = ProdQty[i];
-		TotPurchased[i] = 0;
-		TmpTotPurchased[i] = 0;
-		UserTotPurchased[i] = 0;
+		PtrProd[i] = &Prod[i].ProdID;
+		PtrCompData[i] = &CompData[i].OriginalProdQty;
 	}
 
+	LoadCompanyData();
+	LoadEmployeeData();
+
 	WelcomeScreen();
+
+	// Save All Data
+	SaveCompanyData();
 
 	return 0;
 }
@@ -231,7 +252,7 @@ void UserMainMenu()
 			system("CLS");
 			system("Color 3");
 
-			GroceryDetail(0);
+			GroceryDetail();
 
 			break;
 		}
@@ -242,7 +263,7 @@ void UserMainMenu()
 			// -------------------------------------
 
 			cout << "---------------- THANK YOU ---------------- " << endl << endl;
-			TotalBill(UserTotPurchased, 1);
+			TotalBill(&CustDetail[TotUsers].ItemsQtyInCart[0], 1);
 			cout << "Thank You For Shopping, Have a Good Day!" << endl << endl;
 			system("pause");
 			system("CLS");
@@ -258,10 +279,9 @@ void UserMainMenu()
 			// -------------------------------------
 			for (int i = 0; i < 10; i++)
 			{
-				TotPurchased[i] -= UserTotPurchased[i];
-				ProdQty[i] += UserTotPurchased[i];
+				CompData[i].TotSold -= CustDetail[TotUsers].ItemsQtyInCart[i];
+				Prod[i].ProdQty += CustDetail[TotUsers].ItemsQtyInCart[i];
 				TmpTotPurchased[i] = 0;
-				UserTotPurchased[i] = 0;
 			}
 			run = 0;
 			system("CLS");
@@ -295,15 +315,15 @@ void BuyItem()
 		system("Color 6");
 		Sleep(250);
 
-		if (TmpTotPurchased[i] > 0 || UserTotPurchased[i] > 0)			// If item is already in case
+		if (TmpTotPurchased[i] > 0 || CustDetail[TotUsers].ItemsQtyInCart[i] > 0)			// If item is already in cart
 		{
 			cout << "(Item In Cart)" << endl;
 		}
-		cout << "Product Name: " << ProdName[i] << endl;
-		cout << "Product ID: " << ProdID[i] << endl;
-		cout << "Available Quantity: " << ProdQty[i] << endl;
-		cout << "Product Price: RS " << ProdPrice[i] << endl;
-		cout << "Product Description: " << ProdDescription[i] << endl << endl;
+		cout << "Product Name: " << Prod[i].ProdName << endl;
+		cout << "Product ID: " << Prod[i].ProdID << endl;
+		cout << "Available Quantity: " << Prod[i].ProdQty << endl;
+		cout << "Product Price: RS " << Prod[i].ProdPrice << endl;
+		cout << "Product Description: " << Prod[i].ProdDescription << endl << endl;
 	}	// Didn't use DisplayData() function because I wanted data to appear in one go rather than waiting for user input
 
 	// Ask User For Product ID
@@ -316,19 +336,19 @@ void BuyItem()
 		// Search entered ID & store its index if found
 		do
 		{
-			if (ItemID == ProdID[i])
+			if (ItemID == Prod[i].ProdID)
 			{
 				ItemIndex = i;
 
 				// Check If The Item Is In Cart
-				if (UserTotPurchased[ItemIndex] > 0)
+				if (CustDetail[TotUsers].ItemsQtyInCart[ItemIndex] > 0)
 				{
 					ReBuyItem(ItemIndex);
 					return;
 				}
 
 				// If Product Is Out Of Stock
-				if (ProdQty[ItemIndex] == 0)
+				if (Prod[ItemIndex].ProdQty == 0)
 				{
 					cout << "Sorry Item Is Out Of Stock, Please Try Again" << endl << endl;
 					break;
@@ -340,7 +360,7 @@ void BuyItem()
 					run = 1;		// Item found, break out of loop
 					ItemIndex = i;	// Store at which index Product ID was found
 					break;
-				}
+				}  
 			}
 
 			i++;
@@ -354,6 +374,7 @@ void BuyItem()
 		} while (i < 10);
 
 	} while (!run);
+
 	run = 0;
 
 	// Ask User For Quantity
@@ -363,21 +384,21 @@ void BuyItem()
 		cin >> TmpTotPurchased[ItemIndex];
 
 		// If entered amount greater than available amount
-		if (TmpTotPurchased[ItemIndex] > ProdQty[ItemIndex])
+		if (TmpTotPurchased[ItemIndex] > Prod[ItemIndex].ProdQty)
 		{
 			cout << "Sorry We Don't Have That Much. Enter Again" << endl << endl;
 			run = 1;
 		}
 
-		// Ensure User Has Not Bought More Than 10 Items
+		// Ensure User Has Not Bought More Than 10 Items 
 		else if (TmpTotPurchased[ItemIndex] > 10)
 		{
 			cout << "Sorry, Maximum Amount You Can Buy Is 10" << endl << endl;
 			run = 1;
 		}
-		else if (UserTotPurchased[ItemIndex] + TmpTotPurchased[ItemIndex] > 10)
+		else if (CustDetail[TotUsers].ItemsQtyInCart[ItemIndex] + TmpTotPurchased[ItemIndex] > 10)
 		{
-			cout << "Sorry, Maximum Amount You Can Buy Is 10. You Already Have " << UserTotPurchased[ItemIndex] << " Item(s) In Your Cart" << endl << endl;
+			cout << "Sorry, Maximum Amount You Can Buy Is 10. You Already Have " << CustDetail[TotUsers].ItemsQtyInCart[ItemIndex] << " Item(s) In Your Cart" << endl << endl;
 		}
 		else
 		{
@@ -419,12 +440,12 @@ void BuyItem()
 void DisplayData(int index, bool ShouldRun)
 {
 	system("Color 3");
-	cout << "Product Name: " << ProdName[index] << endl;
-	cout << "Product ID: " << ProdID[index] << endl;
-	cout << "Available Quantity: " << ProdQty[index] << endl;
-	cout << "Quantity In Your Cart: " << UserTotPurchased[index] << endl;
-	cout << "Product Price: " << ProdPrice[index] << endl;
-	cout << "Product Description: " << ProdDescription[index] << endl << endl;
+	cout << "Product Name: " << Prod[index].ProdName << endl;
+	cout << "Product ID: " << Prod[index].ProdID << endl;
+	cout << "Available Quantity: " << Prod[index].ProdQty << endl;
+	cout << "Quantity In Your Cart: " << CustDetail[TotUsers].ItemsQtyInCart[index] << endl;
+	cout << "Product Price: " << Prod[index].ProdPrice << endl;
+	cout << "Product Description: " << Prod[index].ProdDescription << endl << endl;
 	if (ShouldRun)
 	{
 		system("pause");
@@ -448,8 +469,8 @@ void ReBuyItem(int index)
 		case 'Y':
 		{
 			// Remove Existing Items From Cart & Update Available Quantity
-			ProdQty[index] += UserTotPurchased[index];
-			TotPurchased[index] -= UserTotPurchased[index];
+			Prod[index].ProdQty += CustDetail[TotUsers].ItemsQtyInCart[index];
+			CompData[index].TotSold -= CustDetail[TotUsers].ItemsQtyInCart[index];
 
 			// Ask User For Quantity
 			do
@@ -458,18 +479,22 @@ void ReBuyItem(int index)
 				cin >> TmpTotPurchased[index];
 
 				// If entered amount greater than available amount
-				if (UserTotPurchased[index] > OriginalProdQty[index])
+				if (TmpTotPurchased[index] > Prod[index].ProdQty)
 				{
-					cout << "Sorry, Maximum Amount You Can Buy Is: " << ProdQty[index] << endl << endl;
+					cout << "Sorry, Maximum Quantity Available: " << Prod[index].ProdQty << endl << endl;
 					run = 1;
 				}
-				else if (TotPurchased[index] > 10)
+				else if (TmpTotPurchased[index] > 10)
 				{
 					cout << "Sorry, Maximum Amount You Can Buy Is 10" << endl << endl;
 					run = 1;
 				}
 				else
 				{
+					// Update Values & Break Out Of Loop
+					CustDetail[TotUsers].ItemsQtyInCart[index] = TmpTotPurchased[index];
+					Prod[index].ProdQty -= CustDetail[TotUsers].ItemsQtyInCart[index];
+					CompData[index].TotSold += CustDetail[TotUsers].ItemsQtyInCart[index];
 					run = 0;
 				}
 			} while (run);
@@ -534,16 +559,16 @@ void TotalBill(int *arr, bool Checkout)
 	{
 		if (arr[i] > 0)
 		{
-			cout << "Product Name: " << ProdName[i] << endl;
-			cout << "Product ID: " << ProdID[i] << endl;
-			cout << "Product Price: " << ProdPrice[i] << endl;
+			cout << "Product Name: " << Prod[i].ProdName << endl;
+			cout << "Product ID: " << Prod[i].ProdID << endl;
+			cout << "Product Price: " << Prod[i].ProdPrice << endl;
 			cout << "Total Quantity In Your Cart: " << arr[i] << endl;
-			cout << "Price Of Item(s) In Your Cart: RS " << ProdPrice[i] * arr[i] << endl << endl;
-			SumTotal += (ProdPrice[i] * arr[i]);
+			cout << "Price Of Item(s) In Your Cart: RS " << Prod[i].ProdPrice * arr[i] << endl << endl;
+			SumTotal += (Prod[i].ProdPrice * arr[i]);
 		}
 	}
 	cout << "Total Price: RS " << SumTotal << endl;
-	
+
 	do
 	{
 		if (!Checkout)
@@ -564,12 +589,17 @@ void TotalBill(int *arr, bool Checkout)
 		case 'Y':
 		{
 
-			// Update Data By Subtracting Buy Amounts Of All Items In Cart
+			// Update & Reset Data By Subtracting Buy Amounts Of All Items In Cart
 			for (int i = 0; i < 10; i++)
 			{
-				TotPurchased[i] += TmpTotPurchased[i];
-				UserTotPurchased[i] += TmpTotPurchased[i];
-				ProdQty[i] -= TmpTotPurchased[i];
+				Prod[i].ProdQty -= TmpTotPurchased[i];
+				if (Prod[i].ProdQty < 0)
+				{
+					TmpTotPurchased[i] = TmpTotPurchased[i] + (Prod[i].ProdQty - TmpTotPurchased[i]);
+					Prod[i].ProdQty = 0;
+				}
+				CompData[i].TotSold += TmpTotPurchased[i];
+				CustDetail[TotUsers].ItemsQtyInCart[i] += TmpTotPurchased[i];
 			}
 			if (!Checkout)
 			{
@@ -577,11 +607,12 @@ void TotalBill(int *arr, bool Checkout)
 			}
 			else
 			{
+				SaveBill();
+				SaveCompanyData();
 				// User Now Leaving, Reset Everything
 				for (int i = 0; i < 10; i++)
 				{
 					TmpTotPurchased[i] = 0;
-					UserTotPurchased[i] = 0;
 				}
 				return;
 			}
@@ -673,7 +704,7 @@ void Employee_L_S()
 void Login()
 {
 	system("Color 2");
-	
+
 	char choice = '\0';
 	char Username_T[100] = { "\0" }, Password_T[100] = { "\0" };
 	bool run = 0;
@@ -697,7 +728,7 @@ void Login()
 		for (int i = 0; i < counter; i++)
 		{
 			// If Record Found, Go Back To Employee_L_S() Function & Continue Executing Its Code, We Can Call Function Here Directly But It Will Cause This Function To Take Up Space In Memory
-			if (!strcmp(Password_T, Password[i]) && !strcmp(Username_T, Username[i]))
+			if (!strcmp(Password_T, EmpLog[i].Password) && !strcmp(Username_T, EmpLog[i].Username))
 			{
 				cout << endl << "Login Successful!" << endl << endl;
 				system("pause");
@@ -776,16 +807,18 @@ void SignUp()
 	cout << "Enter Username: ";
 	fflush(stdin);
 	cin.ignore();
-	cin.getline(Username[counter], 100);
+	cin.getline(EmpLog[counter].Username, 100);
 
 	// Make Username lowercase
-	for (int i = 0; i < 100 && Username[i] != '\0'; i++)
+	for (int i = 0; i < 100 && EmpLog[i].Username != '\0'; i++)
 	{
-		Username[counter][i] = tolower(Username[counter][i]);
+		EmpLog[counter].Username[i] = tolower(EmpLog[counter].Username[i]);
 	}
 
 	cout << "Enter Password: ";
-	cin.getline(Password[counter], 100);
+	cin.getline(EmpLog[counter].Password, 100);
+
+	SaveEmployeeData();
 
 	counter++;
 
@@ -805,10 +838,12 @@ void EmployeeMainMenu()
 	{
 		system("Color C");
 		cout << "---------------- MENU SELECTION ---------------- " << endl << endl;
-		cout << "Press (1) to Check All Sold Items (Descending Order)" << endl;
-		cout << "Press (2) to Search Item" << endl;
-		cout << "Press (3) to Enter Advanced Analytics" << endl;
-		cout << "Press (4) to Return To Welcome Screen" << endl;
+		cout << "Press (1) to Search Item" << endl;
+		cout << "Press (2) to See All Sold Items" << endl;
+		cout << "Press (3) to See All Sold Items (In Date Range)" << endl;
+		cout << "Press (4) to Edit Product Properties" << endl;
+		cout << "Press (5) to Enter Advanced Analytics" << endl;
+		cout << "Press (6) to Return To Welcome Screen" << endl;
 		cout << "\nPlease Enter Your Choice: ";
 
 		fflush(stdin);	// Used To Clear Input Buffer
@@ -817,21 +852,6 @@ void EmployeeMainMenu()
 		switch (choice)
 		{
 		case 1:
-		{
-
-			// -------------------------------------
-			// CHECK ALL SOLD ITEMS
-			// -------------------------------------
-
-			Sleep(300);
-			system("CLS");
-			system("Color 3");
-
-			GroceryDetail(1);
-
-			break;
-		}
-		case 2:
 		{
 			// -------------------------------------
 			// SEARCH ITEM
@@ -844,18 +864,61 @@ void EmployeeMainMenu()
 
 			break;
 		}
+		case 2:
+		{
+
+			// -------------------------------------
+			// CHECK ALL SOLD ITEMS
+			// -------------------------------------
+
+			Sleep(300);
+			system("CLS");
+			system("Color 3");
+
+			ShowBill();
+
+			break;
+		}
 		case 3:
+		{
+
+			// -------------------------------------
+			// CHECK ALL SOLD ITEMS (GIVEN DATE RANGE)
+			// -------------------------------------
+
+			Sleep(300);
+			system("CLS");
+			system("Color 3");
+
+			RevenueReport();
+
+			break;
+		}
+		case 4:
+		{
+			// -------------------------------------
+			// UPDATE PRODUCT PROPERTIES
+			// -------------------------------------
+
+			system("CLS");
+
+			EditItemDetails();
+
+			break;
+		}
+		case 5:
 		{
 			// -------------------------------------
 			// ADVANCED ANALYTICS
 			// -------------------------------------
 
 			system("CLS");
-			run = 0;
+
 			AdvancedAnalytics();
+
 			break;
 		}
-		case 4:
+		case 6:
 		{
 			// -------------------------------------
 			// EXIT TO WELCOME SCREEN
@@ -877,10 +940,10 @@ void EmployeeMainMenu()
 			system("CLS");
 		}
 		}
-	} while (run == 1);
+	} while (run);
 }
 
-void GroceryDetail(bool isEmployee)
+void GroceryDetail()
 {
 	system("CLS");
 
@@ -894,43 +957,20 @@ void GroceryDetail(bool isEmployee)
 		done[i] = -1;
 	}
 
-	if (isEmployee)
+	cout << "-------------- CART DETAILS --------------" << endl << endl;
+	for (int i = 0; i < 10; i++)
 	{
-		cout << "------------ SOLD ITEM DETAIL ------------" << endl << endl;
-		for (int i = 0; i < 10; i++)
+		index = sort(CustDetail[TotUsers].ItemsQtyInCart, 1);
+		if (index != -1)
 		{
-			index = sort(TotPurchased);
-			if (index != -1)
-			{
-				cout << "---------------- Record " << shown << " ----------------" << endl << endl;
-				DisplayDataCompany(index, 0);
-				SumTotal += (ProdPrice[index] * TotPurchased[index]);
-				TotalProfit += (ProdPrice[index] - ProdBuyPrice[index]) * TotPurchased[index];
-				shown++;
-			}
+			cout << "---------------- Record " << shown << " ----------------" << endl << endl;
+			DisplayData(index, 0);
+			SumTotal += (Prod[index].ProdPrice * CustDetail[TotUsers].ItemsQtyInCart[index]);
+			shown++;
 		}
-
-		cout << "---------------- Reched End Of Record After " << shown - 1 << " Results ----------------" << endl << endl;
-		cout << "Gross Total: RS " << SumTotal << endl;						// Earnings Before Deducting Purchase Amount
-		cout << "Total Profit: RS " << TotalProfit << endl << endl;			// Earnings After Deducting Purchase Amount
 	}
-	else
-	{
-		cout << "-------------- CART DETAILS --------------" << endl << endl;
-		for (int i = 0; i < 10; i++)
-		{
-			index = sort(UserTotPurchased);
-			if (index != -1)
-			{
-				cout << "---------------- Record " << shown << " ----------------" << endl << endl;
-				DisplayData(index, 0);
-				SumTotal += (ProdPrice[index] * UserTotPurchased[index]);
-				shown++;
-			}
-		}
 
-		cout << "---------------- Reched End Of Record After " << shown - 1 << " Results ----------------" << endl << endl;
-	}
+	cout << "---------------- Reched End Of Record After " << shown - 1 << " Results ----------------" << endl << endl;
 	do
 	{
 		cout << "Are You Done (Y/N): ";
@@ -963,19 +1003,20 @@ void GroceryDetail(bool isEmployee)
 		}
 	} while (run);
 }
-
+  
 void DisplayDataCompany(int index, bool run)
 {
 	system("Color 3");
-	cout << "Product Name: " << ProdName[index] << endl;
-	cout << "Product ID: " << ProdID[index] << endl << endl;
-	cout << "Total Quantity: " << OriginalProdQty[index] << endl;
-	cout << "Available Quantity: " << ProdQty[index] << endl;
-	cout << "Total Sold: " << TotPurchased[index] << endl << endl;
-	cout << "Product Price: " << ProdPrice[index] << endl;
-	cout << "Profit Per Item: " << ProdPrice[index] - ProdBuyPrice[index] << endl;
-	cout << "Gross Earnings: " << ProdPrice[index] * TotPurchased[index] << endl;
-	cout << "Profit: " << (ProdPrice[index] - ProdBuyPrice[index]) * TotPurchased[index] << endl << endl;
+	cout << "Product Name: " << Prod[index].ProdName << endl;
+	cout << "Product ID: " << Prod[index].ProdID << endl << endl;
+	cout << "Total Quantity: " << CompData[index].OriginalProdQty << endl;
+	cout << "Available Quantity: " << Prod[index].ProdQty << endl;
+	cout << "Total Sold: " << CompData[index].TotSold << endl << endl;
+	cout << "Product Price: " << Prod[index].ProdPrice << endl;
+	cout << "Product Buy Price: " << CompData[index].ProdBuyPrice << endl;
+	cout << "Profit Per Item: " << Prod[index].ProdPrice - CompData[index].ProdBuyPrice << endl;
+	cout << "Gross Earnings: " << Prod[index].ProdPrice * CompData[index].TotSold << endl;
+	cout << "Profit: " << (Prod[index].ProdPrice - CompData[index].ProdBuyPrice) * CompData[index].TotSold << endl << endl;
 	if (run)
 	{
 		system("pause");
@@ -1048,7 +1089,6 @@ void AdvancedAnalytics()
 
 			run = 0;
 			system("CLS");
-			EmployeeMainMenu();
 			break;
 		}
 		default:
@@ -1065,7 +1105,7 @@ void AdvancedAnalytics()
 	} while (run == 1);
 }
 
-void ProfitableItems(bool Reverse, bool isAvg)
+void ProfitableItems(bool isStockList, bool isAvg)
 {
 	system("Color 3");
 
@@ -1081,7 +1121,7 @@ void ProfitableItems(bool Reverse, bool isAvg)
 	}
 
 	{
-		if (Reverse)
+		if (isStockList)
 		{
 			cout << "--------------- STOCK LIST --------------" << endl << endl;
 		}
@@ -1097,12 +1137,23 @@ void ProfitableItems(bool Reverse, bool isAvg)
 
 	for (int i = 0; i < 10; i++)
 	{
-		if (Reverse)
+		if (isStockList)
 		{
-			LowToHigh[i] = sort(ProdQty);
+			int *ptr = *PtrProd + 1;
+
+			// PtrProd[0] stores the address of 1st variable (ProdID) in the struct called "Product". 
+			// The pointer (ptr) will point to the location that (PtrProd) points to, which is the first variable of the struct called (ProdID).
+			// ptr -> PtrProd[i] -> &(*Prod[i].ProdID) -> *(&Prod[i].ProdID) -> ProdID
+			// ptr -> PtrProd[i] -> Address Of Pointer (Prod[i].ProdID) -> Which Stores The Address Of (Prod[i].ProdID) -> Which Points To ProdID
+			// So I added 1 to the value stored in the pointer (PtrProd), to move to the next address which stores the address ProdQty essentially navigating to the next variable of the struct
+			// ptr -> (PtrProd[i]) + 1 -> [&(*Prod[i].ProdID)] + 1 -> *[(&Prod[i].ProdID) + 1] -> ProdQty
+			// ptr -> (PtrProd[i]) + 1 -> [Address Of Pointer (Prod[i].ProdID)] + 1 -> Which Stores The Address Of [(Prod[i].ProdID) + 1] -> Which Points To ProdQty
+			// Graphical Representation of it shown here: https://raw.githubusercontent.com/Icedwhisper/ECommerce-CMS/master/Explaination.jpg
+
+			LowToHigh[i] = sort(ptr, (sizeof(Prod[0])/4));	// (Size of struct) / (4) [4, because it's an INT pointer and hence moves 4 address spaces when adding 1 to it.
 			if (i == 9)
 			{
-				for (int i = 9; i >= 0; i--)
+				for (int i = 9; i >= 0; i--)				// Print In Reverse Order
 				{
 					if (LowToHigh[i] >= 0 && LowToHigh[i] <= 9)
 					{
@@ -1122,22 +1173,23 @@ void ProfitableItems(bool Reverse, bool isAvg)
 				system("CLS");
 				return;
 			}
-			index = sort(TotPurchased);
+			int *ptr = *PtrCompData + 2;
+			index = sort(ptr, sizeof(CompData[0])/3);
 
 			// Show Only Products That Have Actually Been Bought
-			if (!(OriginalProdQty[index] == ProdQty[index]) && index != -1)
+			if (!(CompData[index].OriginalProdQty == Prod[index].ProdQty) && index != -1)
 			{
 				cout << "---------------- Record " << shown << " ----------------" << endl << endl;
 				DisplayDataCompany(index, 0);
-				cout << "Average Quantity Bought: " << (OriginalProdQty[index] - ProdQty[index]) / (TotUsers + 1.0 - 1.0) << endl;
-				cout << "Expected Number Of Days Stock Will Last: " << ProdQty[index] / ((OriginalProdQty[index] - ProdQty[index]) / (TotUsers + 1.0 - 1.0)) << endl << endl;
+				cout << "Average Quantity Bought: " << (CompData[index].OriginalProdQty - Prod[index].ProdQty) / (TotUsers + 1.0 - 1.0) << endl;
+				cout << "Expected Number Of Days Stock Will Last: " << Prod[index].ProdQty / ((CompData[index].OriginalProdQty - Prod[index].ProdQty) / (TotUsers + 1.0 - 1.0)) << endl << endl;
 				shown++;
-			} 
+			}
 		}
 		else
 		{
 			ProfitData[0] = -9999999;
-			sort(ProfitData);
+			sort(ProfitData, 1);
 			if (ProfitData[0] != -1)
 			{
 				cout << "---------------- Record " << shown << " ----------------" << endl << endl;
@@ -1175,6 +1227,360 @@ void ProfitableItems(bool Reverse, bool isAvg)
 	} while (run);
 }
 
+void EditItemDetails()
+{
+	system("Color 3");
+	int ItemID = 0, ItemIndex = 0, i = 0, choice = 0;
+	bool run = 1;
+
+	cout << "---------------- EDIT ITEM DETAILS ---------------- " << endl << endl;
+
+	do
+	{
+		cout << "Enter ID Of Product To Change It's Properties: ";
+		cin >> ItemID;
+
+		for (i = 0; i < 10; i++)
+		{
+			if (ItemID == Prod[i].ProdID)
+			{
+				ItemIndex = i;
+				i = 10;
+			}
+		}
+
+		// If [i] has been run to 10 iterations, that means no ID match found
+		if (i == 10)
+		{
+			cout << "No Product Of Specified ID Found! Please Try Again" << endl << endl;
+			i = 0;
+		}
+
+	} while (i < 10);
+
+	system("CLS");
+
+	do
+	{
+		cout << "---------------- EDIT ITEM DETAILS ---------------- " << endl << endl;
+		cout << "Product Name: " << Prod[ItemIndex].ProdName << endl;
+		cout << "Product ID: " << Prod[ItemIndex].ProdID << endl << endl;
+		cout << "Total Quantity: " << CompData[ItemIndex].OriginalProdQty << endl;
+		cout << "Available Quantity: " << Prod[ItemIndex].ProdQty << endl;
+		cout << "Product Buy Price: " << CompData[ItemIndex].ProdBuyPrice << endl;
+		cout << "Product Sale Price: " << Prod[ItemIndex].ProdPrice << endl << endl;
+		cout << "Press (1) to Change Product Name" << endl;
+		cout << "Press (2) to Change Product ID" << endl;
+		cout << "Press (3) to Change Product Available Quantity" << endl;
+		cout << "Press (4) to Change Product Buy Price" << endl;
+		cout << "Press (5) to Change Product Sale Price" << endl;
+		cout << "Press (6) to Exit" << endl;
+		cout << "\nPlease Enter Your Choice: ";
+		cin >> choice;
+		cin.ignore();
+		switch (choice)
+		{
+		case 1:
+		{
+			cout << "Enter New Name: ";
+			fflush(stdin);
+			cin.getline(Prod[ItemIndex].ProdName, 100);
+
+			Prod[ItemIndex].ProdName[0] = toupper(Prod[ItemIndex].ProdName[0]);
+
+			// Make Input Uppercase
+			for (int i = 1; i < 100 && Prod[ItemIndex].ProdName[i] != '\0'; i++)
+			{
+				if (Prod[ItemIndex].ProdName[i] == ' ' || Prod[ItemIndex].ProdName[i] == '-' || Prod[ItemIndex].ProdName[i] == ':')
+				{
+					Prod[ItemIndex].ProdName[i + 1] = toupper(Prod[ItemIndex].ProdName[i + 1]);
+					i++;
+				}
+				else
+				{
+					Prod[ItemIndex].ProdName[i] = tolower(Prod[ItemIndex].ProdName[i]);
+				}
+			}
+
+			cout << endl << "Name Updated!" << endl << endl;
+
+			system("pause");
+			system("CLS");
+
+			SaveCompanyData();
+
+			break;
+		}
+		case 2:
+		{
+			int TmpID = 0;
+			bool run = 0;
+
+			// Keep asking for ID till user enters one that has not already been taken
+			do
+			{
+				int i = 0;
+				cout << "Enter New ID: ";
+				cin >> TmpID;
+				for (i = 0; i < 10; i++)
+				{
+					if (Prod[i].ProdID == TmpID)
+					{
+						cout << "Product ID Already Taken!\n\nPlease Try Again!\n\n";
+						run = 1;
+						break;
+					}
+				}
+				if (i == 10)
+				{
+					run = 0;
+				}
+			} while (run);
+
+			Prod[ItemIndex].ProdID = TmpID;
+			cout << endl << "ID Updated!" << endl << endl;
+
+			system("pause");
+			system("CLS");
+
+			SaveCompanyData();
+			break;
+		}
+		case 3:
+		{
+			int TmpProdQty = 0;
+			cout << "Enter New Quantity: ";
+			cin >> TmpProdQty;
+
+			CompData[ItemIndex].OriginalProdQty += TmpProdQty - Prod[ItemIndex].ProdQty;
+			Prod[ItemIndex].ProdQty = TmpProdQty;
+			cout << endl << "Quantity Updated!" << endl << endl;
+
+			system("pause");
+			system("CLS");
+
+			SaveCompanyData();
+			break;
+		}
+		case 4:
+		{
+			cout << "Enter New Buy Price: ";
+			cin >> CompData[ItemIndex].ProdBuyPrice;
+			cout << endl << "Buy Price Updated!" << endl << endl;
+
+			system("pause");
+			system("CLS");
+
+			SaveCompanyData();
+			break;
+		}
+		case 5:
+		{
+			cout << "Enter New Sale Price: ";
+			cin >> Prod[ItemIndex].ProdPrice;
+			cout << endl << "Sale Price Updated!" << endl << endl;
+
+			system("pause");
+			system("CLS");
+
+			SaveCompanyData();
+			break;
+		}
+		case 6:
+		{
+			run = 0;
+			system("CLS");
+			break;
+		}
+		default:
+		{
+			cout << "Please Enter Number Between 1 - 6!" << endl << endl;
+			system("pause");
+			system("CLS");
+			break;
+		}
+		}
+	} while (run);
+}
+ 
+void RevenueReport()
+{
+	fstream ReadFile;
+
+	char TmpData[100] = { '\0' };
+	char * ptr = NULL;
+	bool run = 1;
+	int TotalPrice = 0, TotalProfit = 0, choice = 0;
+	int Day = 0, Month = 0, Year = 0, TmpTotUsers = 0, UserDay = 0, UserMonth = 0, UserYear = 0;
+	int * ReqDay = &Day, *ReqMonth = &Month, *ReqYear = &Year;
+
+	do
+	{
+		cout << "---------------- REVENUE REPORT ---------------- " << endl << endl;
+		cout << "Press (1) to Search Specific Day" << endl;
+		cout << "Press (2) to Search Specific Month" << endl;
+		cout << "Press (3) to Search Specific Year" << endl;
+		cout << "\nPlease Enter Your Choice: ";
+		cin >> choice;
+		cout << endl;
+
+		switch (choice)
+		{
+		case 1:
+		{
+			ReqDay = &UserDay, ReqMonth = &UserMonth, ReqYear = &UserYear;
+
+			cout << "Enter Day (xx): ";
+			cin >> UserDay;
+			cout << "Enter Month Of Day (xx): ";
+			cin >> UserMonth;
+			cout << "Enter Year Of Month (xxxx): ";
+			cin >> UserYear;
+			run = 0;
+			break;
+		}
+		case 2:
+		{
+			ReqMonth = &UserMonth, ReqYear = &UserYear;
+			cout << "Enter Month: ";
+			cin >> UserMonth;
+			cout << "Enter Year Of Month: ";
+			cin >> UserYear;
+			run = 0;
+			break;
+		}
+		case 3:
+		{
+			ReqYear = &UserYear;
+			cout << "Enter Year: ";
+			cin >> UserYear;
+			run = 0;
+			break;
+		}
+		default:
+		{
+			cout << "Please Enter Valid Choice!" << endl << endl;
+			system("pause");
+			system("CLS");
+			break;
+		}
+		}
+	} while (run);
+
+	{
+		ReadFile.open("PastPurchase.txt");
+		int Profit = 0;
+
+		if (ReadFile.is_open())
+		{
+			while (!ReadFile.eof())
+			{
+				ReadFile.getline(TmpData, 100);					// Read first 100 characters of a line
+
+				ptr = strtok(TmpData, ":");						// Colon is separater
+
+				if (ptr != NULL)
+				{
+					if (!strcmp(ptr, "Date"))
+					{
+						ptr = strtok(NULL, ":");				// Go to next index, because required data comes AFTER Colon
+						Day = atoi(ptr);
+						Month = atoi(ptr + 4);					// Move 3 Index To Right
+						if (Month > 9)
+						{
+							Year = atoi(ptr + 7);				// If Month Is 2 Digit, Move 6 Index To The Right
+						}
+						else
+						{
+							Year = atoi(ptr + 6);				// If Month Is 1 Digit, Move 5 Index To The Right
+						}
+						ptr = strtok(NULL, ":");				// Go to next index, because required data comes AFTER Colon
+					}
+				}
+				if (*ReqDay == Day && *ReqMonth == Month && *ReqYear == Year)
+				{
+					run = 1;
+					break;
+				}
+			}
+			if (run)
+			{
+				system("CLS");
+				cout << "---------------- REVENUE REPORT ---------------- " << endl << endl;
+				cout << TmpData << ": ";
+				ptr = strtok(TmpData + 6, ":");						// Colon is separater
+				cout << ptr << endl;
+				ReadFile.getline(TmpData, 100);						// Read first 100 characters of a line
+				while (run && !ReadFile.eof())
+				{
+					cout << TmpData << endl;
+					ptr = strtok(TmpData, ":");
+					if (!strcmp(TmpData, "Profit"))
+					{
+						ptr = strtok(NULL, ":");					// Go to next index, because required data comes AFTER Colon
+						Profit += atoi(ptr + 3);
+					}
+					ReadFile.getline(TmpData, 100);					// Read first 100 characters of a line
+
+					// Extra Check Added To Ensure Only Specified Date Range Gets Displayed!
+					if (TmpData[0] == 'D')							// Because Date Starts With D!
+					{
+						char tmp[100] = { '\0' };
+						strcpy(tmp, TmpData);
+						ptr = strtok(TmpData, ":");					// First Will Show Word Date
+						ptr = strtok(NULL, ":");					// Now Shows Actual Date
+						if (ptr != NULL)
+						{
+							Day = atoi(ptr);						// Store Day
+							Month = atoi(ptr + 4);					// Move 4 Index To Right
+							if (Month > 9)
+							{
+								Year = atoi(ptr + 7);				// If Month Is 2 Digit, Move 7 Index To The Right
+							}
+							else
+							{
+								Year = atoi(ptr + 6);				// If Month Is 1 Digit, Move 6 Index To The Right
+							}
+						}
+						if (*ReqDay == Day && *ReqMonth == Month && *ReqYear == Year)
+						{
+							cout << tmp << endl;
+							run = 1;
+							ReadFile.getline(TmpData, 100);						// Read first 100 characters of a line
+						}
+						else
+						{
+							run = 0;
+						}
+					}
+				}
+
+				//while (TmpData[0] != 'D')							// Because Date Starts With D!
+				//{
+				//	cout << TmpData << endl;
+				//	ptr = strtok(TmpData, ":");
+				//	if (!strcmp(TmpData, "Profit"))
+				//	{
+				//		ptr = strtok(NULL, ":");					// Go to next index, because required data comes AFTER Colon
+				//		Profit += atoi(ptr + 3);
+				//	}
+				//	ReadFile.getline(TmpData, 100);					// Read first 100 characters of a line
+				//}
+
+				cout << "Total Profit: RS " << Profit << endl << endl;
+			}
+			else
+			{
+				cout << endl;
+				cout << "No Data Found In Specified Date Range!" << endl << endl;
+			}
+		}
+		ReadFile.close();
+	}
+
+	system("pause");
+	system("CLS");
+}
 
 // -------------------
 // Data Finding
@@ -1219,23 +1625,35 @@ void SearchMenu(bool isEmployee)
 
 		switch (choice)
 		{
-		case 1:	
+		case 1:
 		{
 			// -------------------------------------
 			// FIND BY ID
 			// -------------------------------------
 
+			int shown = 0;
 			int FindID = 0;
 			system("CLS");
 
 			cout << "Enter Product ID To Find: ";
 			cin >> FindID;
-
-			Find(FindID, ProdID, isEmployee);
+			system("CLS");
+			int Shown = 0;
+			for (int i = 0; i < 10; i++)
+			{
+				if (i == 9)
+				{
+					Shown = Find(FindID, PtrProd[i], isEmployee, 1, Shown, i);
+				}
+				else
+				{
+					Shown = Find(FindID, PtrProd[i], isEmployee, 0, Shown, i);
+				}
+			}
 
 			break;
 		}
-		case 2:	
+		case 2:
 		{
 			// -------------------------------------
 			// FIND BY PRODUCT NAME
@@ -1260,7 +1678,7 @@ void SearchMenu(bool isEmployee)
 
 			break;
 		}
-		case 3:	
+		case 3:
 		{
 			// -------------------------------------
 			// FIND BY TOTAL PURCHASE
@@ -1274,11 +1692,22 @@ void SearchMenu(bool isEmployee)
 			cin >> TotBuy;
 			if (isEmployee)
 			{
-				Find(TotBuy, TotPurchased, isEmployee);
+				int Shown = 0;
+				for (int i = 0; i < 10; i++)
+				{
+					if (i == 9)
+					{
+						Shown = Find(TotBuy, (PtrCompData[i] + 2), isEmployee, 1, Shown, i);
+					}
+					else
+					{
+						Shown = Find(TotBuy, (PtrCompData[i] + 2), isEmployee, 0, Shown, i);
+					}
+				}
 			}
 			else
 			{
-				Find(TotBuy, UserTotPurchased, isEmployee);
+				Find(TotBuy, CustDetail[TotUsers].ItemsQtyInCart, isEmployee, 1, 0, TotUsers);
 			}
 			break;
 		}
@@ -1292,15 +1721,42 @@ void SearchMenu(bool isEmployee)
 
 			system("CLS");
 
-			cout << "Enter Available Quantity Amount To Find: ";
-			cin >> SearchQty;
 			if (isEmployee)
 			{
-				Find(SearchQty, ProdQty, isEmployee);
+				cout << "Enter Available Quantity Amount To Find: ";
+				cin >> SearchQty;
+
+				int Shown = 0;
+				for (int i = 0; i < 10; i++)
+				{
+					if (i == 9)
+					{
+						Shown = Find(SearchQty, (PtrProd[i] + 1) , isEmployee, 1, Shown, i);
+					}
+					else
+					{
+						Shown = Find(SearchQty, (PtrProd[i] + 1), isEmployee, 0, Shown, i);
+					}
+				}
 			}
 			else
 			{
-				Find(SearchQty, UserTotPurchased, isEmployee);
+				int Shown = 0;
+
+				cout << "Enter Quantity To Find: ";
+				cin >> SearchQty;
+
+				for (int i = 0; i < 10; i++)
+				{
+					if (i == 9)
+					{
+						Shown = Find(SearchQty, &CustDetail[TotUsers].ItemsQtyInCart[i], isEmployee, 1, Shown, i);
+					}
+					else
+					{
+						Shown = Find(SearchQty, &CustDetail[TotUsers].ItemsQtyInCart[i], isEmployee, 0, Shown, i);
+					}
+				}
 			}
 
 			break;
@@ -1318,7 +1774,18 @@ void SearchMenu(bool isEmployee)
 			cout << "Enter Product Price To Find: ";
 			cin >> SearchPrice;
 
-			Find(SearchPrice, ProdPrice,isEmployee);
+			int Shown = 0;
+			for (int i = 0; i < 10; i++)
+			{
+				if (i == 9)
+				{
+					Shown = Find(SearchPrice, (PtrProd[i] + 2), isEmployee, 1, Shown, i);
+				}
+				else
+				{
+					Shown = Find(SearchPrice, (PtrProd[i] + 2), isEmployee, 0, Shown, i);
+				}
+			}
 
 			break;
 		}
@@ -1348,27 +1815,24 @@ void SearchMenu(bool isEmployee)
 }
 
 // INPUT TYPE: INT
-void Find(int input, int *data, bool isEmployee)
+int Find(int input, int *data, bool isEmployee, bool Run, int shown, int Runs)
 {
 	system("CLS");
-	int shown = 0;
-	for (int i = 0; i < 10; i++)
+	if (input == *data)
 	{
-		if (input == data[i])
+		cout << "---------------------------- Record " << shown + 1 << " ----------------------------" << endl << endl;
+		if (isEmployee)
 		{
-			cout << "---------------------------- Record " << shown + 1 << " ----------------------------" << endl << endl;
-			if (isEmployee)
-			{
-				DisplayDataCompany(i, 1);
-			}
-			else
-			{
-				DisplayData(i, 1);
-			}
-			shown++;
+			DisplayDataCompany(Runs, 1);
 		}
+		else
+		{
+			DisplayData(Runs, 1);
+		}
+		shown++;
 	}
 	// If not found
+	if (Run)
 	{
 		if (!shown)	// Didn't run
 		{
@@ -1383,6 +1847,7 @@ void Find(int input, int *data, bool isEmployee)
 			system("CLS");
 		}
 	}
+	return shown;
 }
 
 // INPUT TYPE: CHAR
@@ -1392,7 +1857,7 @@ void Find(char *name, bool isEmployee)
 	for (int i = 0; i < 10; i++)
 	{
 		// If Found
-		if (strstr(ProdName[i], name))
+		if (strstr(Prod[i].ProdName, name))
 		{
 			system("CLS");
 			cout << "---------------------------- Record " << shown + 1 << " ----------------------------" << endl << endl;
@@ -1460,7 +1925,7 @@ void Find(char *name, bool isEmployee)
 }
 
 // Sort Data
-int sort(int *arr)
+int sort(int *arr, int size)
 {
 	bool IsDone = 0, run = 0, CalledByPI = 0;
 	int Max = -1, MaxIndex = -1;
@@ -1472,22 +1937,21 @@ int sort(int *arr)
 	{
 		for (int i = 0; i < 10; i++)
 		{
-			temp[i] = ProdPrice[i] - ProdBuyPrice[i];
+			temp[i] = Prod[i].ProdPrice - CompData[i].ProdBuyPrice;
 		}
 		arr = temp;	// Point To Temp Instead Of Passed Array
 		CalledByPI = 1;
 	}
 
-	for (int i = 0; i < 10; i++)
+	for (int i = 0; i < size * 10; i += size)
 	{
 		IsDone = 0;
-		// Find max value stored in array
-		if (arr[i] > Max && arr[i] != 0)
+		if (*(arr + i) > Max && *(arr + i) != 0)
 		{
 			// Check If Index Has Already Been Done
 			for (int j = 0; j < 10; j++)
 			{
-				if (i == done[j])
+				if (i / size == done[j])
 				{
 					IsDone = 1;
 					break;
@@ -1497,8 +1961,8 @@ int sort(int *arr)
 			// If Value Not Done
 			if (!IsDone)
 			{
-				Max = arr[i];
-				MaxIndex = i;
+				Max = *(arr + i);
+				MaxIndex = i / size;
 				run = 1;
 			}
 		}
@@ -1513,6 +1977,373 @@ int sort(int *arr)
 		address[1] = temp[MaxIndex];
 	}
 	return MaxIndex;
+}
+
+// -------------------
+// Saving & Loading
+// -------------------
+
+void SaveCompanyData()
+{
+	ofstream myfile;
+	time_t now = time(0);
+	myfile.open("InventoryDetails.txt");
+
+	// Get Current Date
+	// Learning Source: https://linux.die.net/man/3/gmtime
+	{
+		time_t curr_time;
+		curr_time = time(NULL);
+		tm *tm_gmt = gmtime(&curr_time);
+
+		// tm_mon - The number of months since January, in the range 0 to 11.
+		// tm_year- The number of years since 1900.
+
+		myfile << "Date: " << tm_gmt->tm_mday << "/" << tm_gmt->tm_mon + 1 << "/" << 1900 + tm_gmt->tm_year << endl << endl;
+	}
+
+	for (int index = 0; index < 10; index++)
+	{
+		myfile << "Product Name: " << Prod[index].ProdName << endl;
+		myfile << "Product ID: " << Prod[index].ProdID << endl;
+		myfile << "Product Description: " << Prod[index].ProdDescription << endl;
+		myfile << "Total Quantity: " << CompData[index].OriginalProdQty << endl;
+		myfile << "Available Quantity: " << Prod[index].ProdQty << endl;
+		myfile << "Product Buy Price: " << CompData[index].ProdBuyPrice << endl;
+		myfile << "Product Sale Price: " << Prod[index].ProdPrice << endl;
+		myfile << "Total Sold: " << CompData[index].TotSold << endl << endl;
+		myfile << "-----------------------" << endl << endl;
+	}
+	myfile.close();
+}
+
+void LoadCompanyData()
+{
+	ifstream ReadFile;
+
+	char TmpStore[500] = { '\0' };
+	char *ptr = NULL;
+	int index = 0;
+
+	ReadFile.open("InventoryDetails.txt");
+
+	if (ReadFile.is_open())
+	{
+		while (!ReadFile.eof())
+		{
+			ReadFile.getline(TmpStore, 500);				// Read first 500 characters of a line
+			ptr = strtok(TmpStore, ":");					// Colon is separater
+
+			if (TmpStore[0] == '-')
+			{
+				index++;
+				continue;
+			}
+
+			if (ptr != NULL)
+			{
+				if (!strcmp(ptr, "Product Name")) 
+				{
+					ptr = strtok(NULL, ":");						// Go to next index, because required data comes AFTER Colon
+
+					if (ptr != NULL)
+					{
+						strcpy(Prod[index].ProdName, (ptr + 1));	// First character after Colon is space, ignore that and go to next address/coloumn
+					}
+				}
+				else if (!strcmp(ptr, "Product ID"))
+				{
+					ptr = strtok(NULL, ":");				// Go to next index, because required data comes AFTER Colon
+
+					if (ptr != NULL)
+					{
+						strcpy(TmpStore, ptr + 1);			// First character after Colon is space, ignore that and go to next address/coloumn
+						Prod[index].ProdID = atoi(TmpStore);
+					}
+				}
+				else if (!strcmp(ptr, "Product Description"))
+				{
+					ptr = strtok(NULL, ":");				// Go to next index, because required data comes AFTER Colon
+
+					if (ptr != NULL)
+					{
+						strcpy(Prod[index].ProdDescription, (ptr + 1));	// First character after Colon is space, ignore that and go to next address/coloumn
+					}
+				}
+				else if (!strcmp(ptr, "Total Quantity"))
+				{
+					ptr = strtok(NULL, ":");				// Go to next index, because required data comes AFTER Colon
+
+					if (ptr != NULL)
+					{
+						strcpy(TmpStore, ptr + 1);			// First character after Colon is space, ignore that and go to next address/coloumn
+						CompData[index].OriginalProdQty = atoi(TmpStore);
+					}
+				}
+				else if (!strcmp(ptr, "Available Quantity"))
+				{
+					ptr = strtok(NULL, ":");				// Go to next index, because required data comes AFTER Colon
+
+					if (ptr != NULL)
+					{
+						strcpy(TmpStore, ptr + 1);			// First character after Colon is space, ignore that and go to next address/coloumn
+						Prod[index].ProdQty = atoi(TmpStore);
+					}
+				}
+				else if (!strcmp(ptr, "Product Buy Price"))
+				{
+					ptr = strtok(NULL, ":");				// Go to next index, because required data comes AFTER Colon
+
+					if (ptr != NULL)
+					{
+						strcpy(TmpStore, ptr + 1);			// First character after Colon is space, ignore that and go to next address/coloumn
+						CompData[index].ProdBuyPrice = atoi(TmpStore);
+					}
+				}
+				else if (!strcmp(ptr, "Product Sale Price"))
+				{
+					ptr = strtok(NULL, ":");				// Go to next index, because required data comes AFTER Colon
+
+					if (ptr != NULL)
+					{
+						strcpy(TmpStore, ptr + 1);			// First character after Colon is space, ignore that and go to next address/coloumn
+						Prod[index].ProdPrice = atoi(TmpStore);
+					}
+				}
+				else if (!strcmp(ptr, "Total Sold"))
+				{
+					ptr = strtok(NULL, ":");				// Go to next index, because required data comes AFTER Colon
+
+					if (ptr != NULL)
+					{
+						strcpy(TmpStore, ptr + 1);			// First character after Colon is space, ignore that and go to next address/coloumn
+						CompData[index].TotSold = atoi(TmpStore);
+					}
+				}
+				else
+				{
+					ptr = strtok(NULL, ":");				// Go to next index, because required data not found
+				}
+			}
+		}
+		ReadFile.close();
+	}
+}
+
+void SaveBill()
+{
+	fstream ReadFile;
+	time_t now = time(0);
+	time_t curr_time;
+	curr_time = time(NULL);
+	tm *tm_gmt = gmtime(&curr_time);
+
+	char TmpData[100] = { '\0' };
+	char * ptr = NULL;
+	bool run = 1;
+	int TotalPrice = 0;
+	int TotalProfit = 0;
+
+	// Get Current Date
+	// Learning Source: https://linux.die.net/man/3/gmtime
+	{
+		int Day = 0, Month = 0, Year = 0, TmpTotUsers = 0;
+		ReadFile.open("PastPurchase.txt", fstream::in);
+
+		if (ReadFile.is_open())
+		{
+			while (!ReadFile.eof())
+			{
+				ReadFile.getline(TmpData, 100);					// Read first 100 characters of a line
+
+				ptr = strtok(TmpData, ":");						// Colon is separater
+
+				if (ptr != NULL)
+				{
+					if (!strcmp(ptr, "Date"))
+					{
+						ptr = strtok(NULL, ":");				// Go to next index, because required data comes AFTER Colon
+						Day = atoi(ptr);
+						Month = atoi(ptr + 4);					// Move 3 Index To Right
+						if (Month > 9)
+						{
+							Year = atoi(ptr + 7);				// If Month Is 2 Digit, Move 6 Index To The Right
+						}
+						else
+						{
+							Year = atoi(ptr + 6);				// If Month Is 1 Digit, Move 5 Index To The Right
+						}
+						ptr = strtok(NULL, ":");				// Go to next index, because required data comes AFTER Colon
+					}
+				}
+
+				// If Date Is The Same, Don't Add The Date Again
+				if (tm_gmt->tm_mday == Day && (tm_gmt->tm_mon + 1) == Month && (1900 + tm_gmt->tm_year) == Year)
+				{
+					run = 0;
+					break;
+				}
+			}
+		}
+		ReadFile.close();
+
+		ReadFile.open("PastPurchase.txt", fstream::in);
+		do
+		{
+			ReadFile.getline(TmpData, 100);
+			ptr = strtok(TmpData, ":");
+			if ((!strcmp(TmpData, "Customer Number")))
+			{
+				ptr = strtok(NULL, ":");				// Go to next index, because required data comes AFTER Colon
+				TmpTotUsers = atoi(ptr);
+			}
+
+		} while (!ReadFile.eof());
+		TotUsers = TmpTotUsers;
+		ReadFile.close();
+	}
+
+	ReadFile.open("PastPurchase.txt", fstream::app);
+
+	if (run)
+	{
+		ReadFile << "Date: " << tm_gmt->tm_mday << "/" << tm_gmt->tm_mon + 1 << "/" << 1900 + tm_gmt->tm_year << endl << endl;
+		// tm_mon - The number of months since January, in the range 0 to 11.
+		// tm_year- The number of years since 1900.
+	}
+
+	ReadFile << "Customer Number: " << TotUsers + 1 << endl << endl;
+
+	for (int index = 0; index < 10; index++)
+	{
+		if (CustDetail[TotUsers].ItemsQtyInCart[index])	// If ItemsQtyInCart > 0
+		{
+			ReadFile << "Product Name: " << Prod[index].ProdName << endl;
+			ReadFile << "Product ID: " << Prod[index].ProdID <<	endl;
+			ReadFile << "Quantity Bought: " << CustDetail[TotUsers].ItemsQtyInCart[index] << endl;
+			ReadFile << "Product Buy Price: RS " << CompData[index].ProdBuyPrice << endl;
+			ReadFile << "Product Sale Price: RS " << Prod[index].ProdPrice << endl << endl;
+			TotalPrice += Prod[index].ProdPrice * CustDetail[TotUsers].ItemsQtyInCart[index];
+			TotalProfit += (Prod[index].ProdPrice - CompData[index].ProdBuyPrice) * CustDetail[TotUsers].ItemsQtyInCart[index];
+		}
+	}
+	ReadFile << "Gross Earning: RS " << TotalPrice << endl;
+	ReadFile << "Profit: RS " << TotalProfit << endl << endl;
+
+	ReadFile << "-----------------------" << endl << endl;
+
+	ReadFile.close();
+}
+
+void ShowBill()
+{
+	char TmpData[100] = { '\0' };
+	char * ptr = TmpData;
+	int Qty = 0, BuyPrice = 0, SalePrice = 0;
+	ifstream ReadFile;
+	ReadFile.open("PastPurchase.txt");
+	int Profit = 0;
+
+	cout << "---------------- PAST BILLS ---------------- " << endl << endl;
+
+	if (ReadFile.is_open())
+	{
+		while (!ReadFile.eof())
+		{
+			ReadFile.getline(TmpData, 100);					// Read first 100 characters of a line
+
+			cout << TmpData << endl;
+
+			ptr = strtok(TmpData, ":");						// Colon is separater
+
+			if (ptr != NULL)
+			{
+				if (!strcmp(ptr, "Quantity Bought"))
+				{
+					ptr = strtok(NULL, ":");				// Go to next index, because required data comes AFTER Colon
+					Qty = atoi(ptr);
+				}
+				else if (!strcmp(ptr, "Product Buy Price"))
+				{
+					ptr = strtok(NULL, ":");				// Go to next index, because required data comes AFTER Colon
+					BuyPrice = atoi(ptr + 3);
+				}
+				else if (!strcmp(ptr, "Product Sale Price"))
+				{
+					ptr = strtok(NULL, ":");				// Go to next index, because required data comes AFTER Colon
+					SalePrice = atoi(ptr + 3);
+				}
+				else if (!strcmp(ptr, "Profit"))
+				{
+					ptr = strtok(NULL, ":");				// Go to next index, because required data comes AFTER Colon
+					Profit += atoi(ptr + 3);
+				}
+			}
+		}
+		ReadFile.close();
+	}
+	cout << "Total Profit: RS " << Profit << endl << endl;
+	system("pause");
+	system("CLS");
+}
+
+void SaveEmployeeData()
+{
+	ofstream myfile;
+	myfile.open("EmployeeLoginDetails.txt", ios::app);
+	myfile << "Username: " << EmpLog[counter].Username << endl;
+	myfile << "Password: " << EmpLog[counter].Password << endl;
+	myfile << "-----------------------" << endl;
+	myfile.close();
+}
+
+void LoadEmployeeData()
+{
+	ifstream ReadFile;
+
+	char TmpStore[100] = { '\0' };
+	char TmpPassword[100] = { '\0' };
+	char *ptr = NULL;
+
+	ReadFile.open("EmployeeLoginDetails.txt");
+	if (ReadFile.is_open())
+	{
+		while (!ReadFile.eof())
+		{
+			ReadFile.getline(TmpStore, 100);				// Read first 100 characters of a line
+			ptr = strtok(TmpStore, ":");					// Colon is separater
+
+			if (ptr != NULL)
+			{
+				if (!strcmp(ptr, "Username"))
+				{
+					ptr = strtok(NULL, ":");				// Go to next index, because the username/password comes AFTER Colon
+
+					if (ptr != NULL)
+					{
+						strcpy(TmpStore, (ptr + 1));		// First character after Colon is space, ignore that and go to next address/coloumn
+						strcpy(EmpLog[counter].Username, TmpStore);
+					}
+				}
+				else if (!strcmp(ptr, "Password"))
+				{
+					ptr = strtok(NULL, ":");				// Go to next index, because the username/password comes AFTER Colon
+
+					if (ptr != NULL)
+					{
+						strcpy(TmpStore, (ptr + 1));		// First character after Colon is space, ignore that and go to next address/coloumn
+						strcpy(EmpLog[counter].Password, TmpStore);
+						counter++;
+					}
+				}
+				else
+				{
+					ptr = strtok(NULL, ":");				// Go to next index, because the username/password not found
+				}
+			}
+		}
+		ReadFile.close();
+	}
 }
 
 /*
@@ -1534,47 +2365,23 @@ Extra Functionality:
 	3) Advanced Analytics menu which shows extra data about how products are performing, such as:
 			=> List of most profitable items
 			=> List of items low on stock
-			=> Average Sale Amount of a specific product, i.e, average buy rate by the customers 
+			=> Average Sale Amount of a specific product, i.e, average buy rate by the customers
 			=> Know how long your stock will last in the Advanced Analytics menu -> Average Sale Amount
 	4) Pretty Colors
 
 4) Extensive Error Handling to ensure user does not encounter any bugs
 
 Challenges I Made For Myself
-	1) Main() should only call only ONE function, and do nothing else
-	2) Remove all unnecessary code 
-	3) Play with addresses as much as possible
-	4) Reuse functions by repurposing them in a manner that allows the same task with slight modifications to be done using them
-	5) Try to use Function Overloading for atleast one thing. Verdict: It is only useful in bigger programs when you run out of names, and confusing 
+	1) Learn how to navigate through a stuct using address manipulation
+	2) Implement a function that allows different structs to be passed to it, and access variables of the struct
 
 What I've Learnt Through This Project:
-	1) Importance of documentation
-	2) How Recursions work and what happens when you call a function within a function, and how to properly terminate recursion in a manner that doesn't break the program/cause unwanted code execution
-	3) How to reduce code by modifying existing functions
-	4) How to work with global variables
-	5) How to work with pointers and addresses
-	6) How passing by reference reduces code and decreases complexity of code
-	7) How to make sort function work with most input types
+	1) Uses of structs
+	2) Passing & Navigation of structs through different functions using pointers
 
 Questions At The End Of The Project:
-	 1) How to do file-handling to save variables for later use (TAUGHT IN LATEST LAB)
-	 2) How safe global variables are and is it better to use them or should I create local variables and pass a reference to them?
-	 3) Why does cin sometimes not work? This is expecially true when trying to take in input with space. I have to use fflush() and cin.ignore(), 
-		but if not used correctly, it can cause the first letter to get ignored, a big no no if you have a login system! 
-		Another problem I've noticed is that if the user enters a character where the input is to be stored in an INT variable, it causes the input system
-		to completely break. You will run into infinite loop of automatic input and error messages running on screen unless you terminate the program.
-	 4) When I point a pointer to an address stored in another pointer which stores the address of an array (i.e, another pointer), 
-		it only shows the first value stored in the array, but not the rest of it. e.g:
-
-		int arr[10] = { 0, 1, 2, 3, 4, 5, 6, 7, 8, 9 };
-		int * ptr = arr;
-		int * ptr2 = ptr;
-
-		If I try to access ptr2, it will only show the first value stored in arr in the debugger (auto watch variable), i.e, arr[0] = 0, whereas the array arr
-		in the debugger shows all of its indexes.
-		I assume it has something to do with the program not being able to tell where the array ends, but if that is the case, then how do dynamic arrays work? 
-		I mean I understand that they are created and allotted memory dynamically at run time, but what if that array uses all the continous memory locations 
-		available, will the array get copied to a new address with more space available? How will the programmer access the new elements of it then?
+	1) Why is there STILL no way to pass entire structs BY REFERENCE!? 
+	2) Why can't we pass struct objects as variables!?
 
 I HAVE ALSO UPLOADED THE PROJECT TO GITHUB, CHECK IT OUT HERE: https://github.com/Icedwhisper/ECommerce-CMS
 */
